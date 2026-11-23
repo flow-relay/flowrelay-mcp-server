@@ -1,0 +1,53 @@
+{
+  "name": "@flowrelay/mcp-server",
+  "version": "1.10.0",
+  "mcpName": "it.flowrelay/flowrelay",
+  "description": "Flow Relay MCP Server for Claude Desktop and Claude Code – handoffs, integrations and context events via natural conversation.",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "author": "Adriano Sorbello (atrisorb) <https://github.com/atrisorb>",
+  "homepage": "https://www.flowrelay.it",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flow-relay/flowrelay-mcp-server.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "flow-relay",
+    "context",
+    "handoff",
+    "ai"
+  ],
+  "bin": {
+    "flowrelay-mcp": "dist/index.js"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "it.flowrelay/flowrelay",
+  "title": "Flow Relay",
+  "description": "Project context, handoffs, Ask with sources, plans and forecasts from your team's tools.",
+  "websiteUrl": "https://www.flowrelay.it",
+  "version": "1.10.0",
+  "repository": { "url": "https://github.com/flow-relay/flowrelay-mcp-server", "source": "github" },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@flowrelay/mcp-server",
+      "version": "1.10.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "FLOWRELAY_API_KEY", "description": "A Flow Relay API key (Settings, API keys).", "isRequired": true, "isSecret": true },
+        { "name": "FLOWRELAY_PROJECT_ID", "description": "Optional project to use when a tool omits project_id.", "isRequired": false }
+      ]
+    }
+  ],
+  "remotes": [{ "type": "streamable-http", "url": "https://www.flowrelay.it/mcp" }]
+}
