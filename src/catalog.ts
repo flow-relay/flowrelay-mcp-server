@@ -265,3 +265,96 @@ export function registerAppViews(server: McpServer, html: Record<AppView, string
 export function jobStartedText(jobId: string): string {
   return `Started. The artifact is not ready yet: read flowrelay://jobs/${jobId} for its state, and again in a few seconds until it shows the finished document.`;
 }
+
+export interface ToolCatalogEntry {
+  readonly name: string;
+  readonly summary: string;
+}
+
+export interface ToolCatalogGroup {
+  readonly label: string;
+  readonly tools: readonly ToolCatalogEntry[];
+}
+
+/**
+ * Grouped tool table shared with the Downloads page (`src/app/downloads/page.tsx`).
+ * Tested against `tools/list` in `tests/mcp-catalog-parity.test.ts` so every
+ * shipped tool stays listed.
+ */
+export const TOOL_CATALOG_GROUPS: readonly ToolCatalogGroup[] = [
+  {
+    label: 'Context',
+    tools: [
+      { name: 'get_workspace_context', summary: 'See the workspaces your key reaches, the active project and your role in it' },
+      { name: 'list_projects', summary: 'List personal and organization projects you can access' },
+      { name: 'set_active_project', summary: 'Set or clear the project the other tools work on' },
+      { name: 'list_filter_options', summary: 'List selectable resources, branches, event types and priorities per source so filters use real values' },
+    ],
+  },
+  {
+    label: 'Handoffs',
+    tools: [
+      { name: 'list_handoffs', summary: 'List your handoffs filtered by status (active or archived) and limit' },
+      { name: 'generate_handoff', summary: 'Generate a project handoff for the active or selected project with optional source filters' },
+    ],
+  },
+  {
+    label: 'Integrations and events',
+    tools: [
+      { name: 'list_integrations', summary: 'List connected integrations in personal or project scope' },
+      { name: 'list_untracked_resources', summary: 'List discovered active resources not yet assigned to any project' },
+      { name: 'list_events', summary: 'Browse recent events in personal or project scope' },
+    ],
+  },
+  {
+    label: 'Insights and analysis',
+    tools: [
+      { name: 'generate_correlation_insight', summary: 'Generate cross-source correlation AI insight for the project scope with optional source filters' },
+      { name: 'generate_onboarding_brief', summary: 'Generate onboarding brief AI insight for the project scope with optional source filters' },
+      { name: 'generate_architecture_insight', summary: 'Generate architecture insight for the project scope with optional source filters' },
+      { name: 'generate_release_notes', summary: 'Generate release notes for the active project' },
+      { name: 'list_insights', summary: 'List project AI insights for a selected project scope' },
+      { name: 'list_digests', summary: 'List project digests for a selected project scope' },
+      { name: 'ask_project', summary: 'Ask the active project a question, by depth, and continue a thread; answers carry their sources' },
+    ],
+  },
+  {
+    label: 'Work items',
+    tools: [
+      { name: 'list_work_items', summary: 'List work items in the active project with optional status and assignee filters' },
+      { name: 'get_work_item', summary: 'Get full details of a single work item by ID' },
+      { name: 'list_my_work', summary: 'List work items assigned to the current user' },
+      { name: 'create_work_item', summary: 'Create a new work item in the active project' },
+      { name: 'update_work_item', summary: 'Update fields on an existing work item' },
+      { name: 'list_suggestions', summary: 'List AI-generated suggestions for new work items or improvements' },
+      { name: 'link_evidence', summary: 'Link an event or artifact as evidence to a work item' },
+      { name: 'resolve_suggestion', summary: 'Accept or dismiss a suggestion' },
+      { name: 'delete_work_item', summary: 'Delete a work item – a soft delete, restorable from the change history' },
+    ],
+  },
+  {
+    label: 'Plan and portfolio',
+    tools: [
+      { name: 'generate_plan_review', summary: 'Generate a plan review for the active project' },
+      { name: 'get_earned_value', summary: 'Get earned value management metrics for the project' },
+      { name: 'list_raid', summary: 'List the project RAID register (risks, assumptions, issues and dependencies)' },
+      { name: 'get_portfolio', summary: 'Get portfolio-level overview across projects' },
+      { name: 'get_forecast', summary: 'Get project forecast and schedule projections' },
+      { name: 'plan_whatif', summary: 'Run a what-if scenario against the plan' },
+      { name: 'list_automations', summary: 'List automation rules configured for the project' },
+      { name: 'list_templates', summary: 'List available work-item templates' },
+      { name: 'apply_template', summary: 'Apply a work-item template to the active project' },
+      { name: 'list_approvals', summary: 'List pending change requests and approvals' },
+      { name: 'request_change', summary: 'Submit a change request for a work item' },
+      { name: 'decide_approval', summary: 'Approve, reject or withdraw a pending change request' },
+      { name: 'create_raid_entry', summary: 'Add a risk, assumption, issue or dependency to the RAID register' },
+    ],
+  },
+  {
+    label: 'Discord',
+    tools: [
+      { name: 'discord_list_channels', summary: 'List text channels in your connected Discord server' },
+      { name: 'discord_send_message', summary: 'Send a message to a Discord channel in your connected server' },
+    ],
+  },
+];

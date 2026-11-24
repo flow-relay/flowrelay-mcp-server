@@ -25,3 +25,12 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm publish --access public
+
+      - name: Publish to MCP Registry
+        if: vars.MCP_REGISTRY_PUBLISH == 'true'
+        env:
+          MCP_REGISTRY_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar -xz -C /tmp mcp-publisher
+          /tmp/mcp-publisher login dns --domain flowrelay.it --private-key "$MCP_REGISTRY_PRIVATE_KEY"
+          /tmp/mcp-publisher publish server.json

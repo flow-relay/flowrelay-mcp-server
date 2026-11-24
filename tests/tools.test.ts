@@ -203,6 +203,8 @@ function textOf(result: Awaited<ReturnType<Client['callTool']>>) {
   return content.map((c) => c.text ?? '').join('\n');
 }
 
+const DESTRUCTIVE_TOOLS = new Set(['delete_work_item', 'update_work_item', 'resolve_suggestion', 'decide_approval', 'discord_send_message']);
+
 describe('tool surface', () => {
   test('declares 40 tools, each with all four annotation hints', async () => {
     const { tools } = await client.listTools();
@@ -211,8 +213,39 @@ describe('tool surface', () => {
       for (const hint of ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint'] as const) {
         assert.equal(typeof tool.annotations?.[hint], 'boolean', `${tool.name} missing ${hint}`);
       }
-      assert.equal(tool.annotations?.destructiveHint, tool.name === 'delete_work_item', `${tool.name} destructive hint`);
+      assert.equal(tool.annotations?.destructiveHint, DESTRUCTIVE_TOOLS.has(tool.name), `${tool.name} destructive hint`);
+      if (tool.annotations?.readOnlyHint) assert.equal(tool.annotations.destructiveHint, false, `${tool.name} is read-only and destructive`);
     }
+  });
+
+  test('every tool has a readable sentence-case title and a name of at most 64 characters', async () => {
+    const { tools } = await client.listTools();
+    const titles = new Set<string>();
+    for (const tool of tools) {
+      assert.ok(tool.name.length <= 64, `${tool.name} is longer than 64 characters`);
+      assert.equal(typeof tool.title, 'string', `${tool.name} has no title`);
+      const title = tool.title as string;
+      assert.ok(title.length >= 3 && title.length <= 60 && title === title.trim(), `${tool.name} title length`);
+      assert.match(title, /^[A-Z]/, `${tool.name} title starts with a capital`);
+      assert.doesNotMatch(title, /\./, `${tool.name} title punctuation`);
+      assert.ok(!title.includes(String.fromCharCode(0x2014)), `${tool.name} title has an em dash`);
+      assert.doesNotMatch(title, /^[A-Z][a-z]+( [A-Z][a-z]+)+$/, `${tool.name} title is in title case`);
+      assert.ok(!titles.has(title), `${tool.name} repeats the title "${title}"`);
+      titles.add(title);
+      assert.ok(tool.description && tool.description.length > 20, `${tool.name} has no description`);
+    }
+  });
+
+  test('a tool that deletes, overwrites or sends something out for good asks the client to confirm', async () => {
+    const { tools } = await client.listTools();
+    const byName = new Map(tools.map((t) => [t.name, t.annotations]));
+    for (const name of DESTRUCTIVE_TOOLS) {
+      assert.equal(byName.get(name)?.destructiveHint, true, name);
+      assert.equal(byName.get(name)?.readOnlyHint, false, name);
+    }
+    for (const name of ['discord_send_message', 'resolve_suggestion', 'decide_approval']) assert.equal(byName.get(name)?.idempotentHint, false, name);
+    for (const name of ['update_work_item', 'delete_work_item']) assert.equal(byName.get(name)?.idempotentHint, true, name);
+    assert.equal(byName.get('discord_send_message')?.openWorldHint, true);
   });
 
   test('declares three prompts and the two resource templates', async () => {

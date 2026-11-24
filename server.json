@@ -4,13 +4,18 @@
   "title": "Flow Relay",
   "description": "Project context, handoffs, Ask with sources, plans and forecasts from your team's tools.",
   "websiteUrl": "https://www.flowrelay.it",
-  "version": "1.10.0",
+  "version": "1.10.1",
+  "icons": [
+    { "src": "https://www.flowrelay.it/flow-relay.svg", "mimeType": "image/svg+xml", "sizes": ["any"], "theme": "light" },
+    { "src": "https://www.flowrelay.it/flow-relay-dark-theme.svg", "mimeType": "image/svg+xml", "sizes": ["any"], "theme": "dark" },
+    { "src": "https://www.flowrelay.it/icon.png", "mimeType": "image/png", "sizes": ["1024x1024"] }
+  ],
   "repository": { "url": "https://github.com/flow-relay/flowrelay-mcp-server", "source": "github" },
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@flowrelay/mcp-server",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         { "name": "FLOWRELAY_API_KEY", "description": "A Flow Relay API key (Settings, API keys).", "isRequired": true, "isSecret": true },

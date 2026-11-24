@@ -2,6 +2,25 @@
 
 All notable changes to `@flowrelay/mcp-server`. Version numbers move in lockstep with the VS Code extension for any change to the tool vocabulary or to a source's capabilities; releases that only touch one surface (an extension-only UI fix, a server-only dependency bump) advance that surface alone.
 
+## 1.10.1 – 2026-11-24
+
+### Added
+- `glama.json` at the package root, so the Glama listing can be claimed by its maintainer.
+- `llms-install.md`: install steps for Cline that an agent can follow without other context. The hosted server with a browser sign-in comes first, then the npm package with an API key.
+- A README section, "Plugins and one-click install": ChatGPT and Codex, Claude, Cursor, VS Code and GitHub Copilot, Antigravity, Gemini CLI and Mistral Vibe load Flow Relay from one plugin source, https://github.com/flow-relay/flowrelay-agent-plugin.
+- `icons` (light/dark SVG and 1024px PNG) in `server.json` for the MCP Registry.
+- Hosted server discovery: `/.well-known/mcp/server-card.json` (SEP-2127) and `/.well-known/ai-catalog.json` (ARD 1.0).
+- `.github/plugin/marketplace.json` in `agent-plugin/` for VS Code and GitHub Copilot plugin marketplaces.
+
+### Changed
+- Five tools carry `destructiveHint: true`, which is what the Claude Connectors Directory and the OpenAI app guidelines ask for a tool that overwrites data or sends something that cannot be taken back: `update_work_item`, `resolve_suggestion`, `decide_approval` and `discord_send_message` join `delete_work_item`. They stay write tools and nothing about their behaviour changes; clients can now ask before running them. `update_work_item` and `delete_work_item` stay idempotent, the other three are not.
+- Four tool descriptions say what the tool returns and when it applies instead of telling the model to call it first or before another tool: `get_workspace_context`, `list_projects`, `list_my_work` and `list_filter_options`.
+- The test suite of each surface now fails when a tool has no `title`, repeats one, writes it in title case or has a name over 64 characters. It also fails when a read-only tool is marked destructive. Both surfaces must list the same title for each of the 40 tools.
+
+### Fixed
+- Hosted server, OAuth: a loopback redirect (`http://localhost`, `http://127.0.0.1` or `http://[::1]`) now matches the one a client declared with the port ignored, as RFC 8252 section 7.3 asks. Claude Code declares `http://localhost/callback` in its client metadata document and listens on a free port, so its sign-in used to stop at "Unknown client". The consent screen now names the host the member returns to and warns when it is an address on their own device.
+- Hosted server, OAuth: dynamic registration answers with the `refresh_token` grant it supports, token responses carry `Pragma: no-cache` next to `Cache-Control: no-store` and the two discovery documents can be cached for five minutes.
+
 ## 1.10.0 – 2026-11-23
 
 ### Added

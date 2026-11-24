@@ -95,6 +95,8 @@ const WRITE_IDEMPOTENT = { readOnlyHint: false, destructiveHint: false, idempote
 
 const DESTRUCTIVE = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true };
 
+const DESTRUCTIVE_ONCE = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true };
+
 export function normalizeProjectId(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
@@ -359,7 +361,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
     'get_workspace_context',
     {
       title: 'Workspace context',
-      description: 'Show the current Flow Relay context: the workspaces the API key reaches (personal projects and each organization by name), how many projects it can open, the active project and the caller\'s role in it. Good first call to orient yourself before other tools.',
+      description: 'Show the current Flow Relay context: the workspaces the API key reaches (personal projects and each organization by name), how many projects it can open, the active project and the caller\'s role in it. Use it to check which workspaces and which project are in scope.',
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
@@ -396,7 +398,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
     'list_projects',
     {
       title: 'List projects',
-      description: 'List every project the API key can access (personal and organization), each with its id, scope, the prefix of its work item keys and the caller\'s role. The id returned here is what you pass as project_id to the generate_* and list tools – start here whenever you need one.',
+      description: 'List every project the API key can access (personal and organization), each with its id, scope, the prefix of its work item keys and the caller\'s role. The id returned here is the project_id that the generate_* and list tools take.',
       inputSchema: z.object({}),
       annotations: READ_ONLY,
       outputSchema: OUTPUT_SCHEMAS.list_projects,
@@ -740,7 +742,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
           .describe('Send the latest active artifact of this kind. Requires project_id'),
         project_id: z.string().optional().describe('Project UUID. Required only when artifact is set'),
       }),
-      annotations: MUTATING,
+      annotations: DESTRUCTIVE_ONCE,
     },
     async ({
       channel_id,
@@ -1024,7 +1026,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
     'list_filter_options',
     {
       title: 'List filter options',
-      description: 'List the real per-source filter values (resources, branches, event types, priorities) available for a project. Call this BEFORE generate_handoff or any generate_*_insight so the "filters" argument uses real values instead of guesses. Pass a resource id into filters[source].projects, a branch name into .branches, an event type into .eventTypes, a priority into .priorities.',
+      description: 'List the real per-source filter values (resources, branches, event types, priorities) available for a project. These are the values the "filters" argument of generate_handoff and the generate_*_insight tools accepts: a resource id goes into filters[source].projects, a branch name into .branches, an event type into .eventTypes and a priority into .priorities. A value that is not listed here matches no events.',
       inputSchema: z.object({
         project_id: z.string().optional().describe('Project scope. Omit to use the active project.'),
       }),
@@ -1129,7 +1131,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
     'list_my_work',
     {
       title: 'List my work',
-      description: 'List the work items assigned to you across every accessible project: open items plus the ones finished in the last 7 days, with status, progress and dates. A good first call for "what should I work on next".',
+      description: 'List the work items assigned to you across every accessible project: open items plus the ones finished in the last 7 days, with status, progress and dates. Use it to answer "what should I work on next".',
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
@@ -1204,7 +1206,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
         deadline: z.string().nullable().optional().describe('Deadline as YYYY-MM-DD or YYYY-MM-DDTHH:mm in the plan time zone, or null to clear it.'),
         project_id: z.string().optional().describe('Project id from list_projects. Omit to use the active project.'),
       }),
-      annotations: WRITE_IDEMPOTENT,
+      annotations: DESTRUCTIVE,
     },
     async ({ ref, status, percent_complete, title, description, priority, blocked, duration, deadline, project_id }: { ref: string; status?: string; percent_complete?: number; title?: string; description?: string; priority?: number; blocked?: boolean; duration?: string; deadline?: string | null; project_id?: string }) => {
       try {
@@ -1564,7 +1566,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
         action: z.enum(['accept', 'dismiss']).describe('accept applies the suggestion to the plan, dismiss hides it.'),
         project_id: z.string().optional().describe('Project id from list_projects. Omit to use the active project.'),
       }),
-      annotations: MUTATING,
+      annotations: DESTRUCTIVE_ONCE,
     },
     async ({ suggestion_id, action, project_id }: { suggestion_id: string; action: 'accept' | 'dismiss'; project_id?: string }) => {
       try {
@@ -1639,7 +1641,7 @@ export function createFlowRelayServer(rawApi: FlowRelayAPI, initialProjectId: st
         note: z.string().max(1000).optional().describe('Why, shown to the other person.'),
         project_id: z.string().optional().describe('Project id from list_projects. Omit to use the active project.'),
       }),
-      annotations: MUTATING,
+      annotations: DESTRUCTIVE_ONCE,
     },
     async ({ approval_id, decision, note, project_id }: { approval_id: string; decision: 'approve' | 'reject' | 'withdraw'; note?: string; project_id?: string }) => {
       try {

@@ -11,7 +11,7 @@ It connects to Flow Relay API v1 using an API key and supports:
 ## Package
 
 - Name: @flowrelay/mcp-server
-- Version: 1.10.0
+- Version: 1.10.1
 
 ## Supported Sources (52 Integrations)
 
@@ -32,7 +32,7 @@ Flow Relay MCP Server supports 52 integration sources across the entire engineer
 
 ## What Is Included
 
-The server currently exposes 40 tools, 3 prompts, 2 resource templates (the latest handoff of a project and a generation job) and 6 interactive views for MCP Apps hosts. The ten data tools also return structured content. Every tool carries the four MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`): the `list_*` and `get_*` tools are read-only and idempotent, the `generate_*` tools (including `generate_plan_review`), `create_work_item`, `create_raid_entry`, `resolve_suggestion`, `decide_approval`, `request_change` and `discord_send_message` are non-idempotent (each call runs a generation, creates an item or an entry, files a request, decides one or posts a message), `update_work_item` and `link_evidence` write but are idempotent (the same values twice leave the item unchanged) and `delete_work_item` is the one destructive tool (`destructiveHint: true`, so clients can ask before it runs; the deletion can be restored from the change history).
+The server currently exposes 40 tools, 3 prompts, 2 resource templates (the latest handoff of a project and a generation job) and 6 interactive views for MCP Apps hosts. The ten data tools also return structured content. Every tool carries a `title` and the four MCP annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`): the `list_*` and `get_*` tools, `discord_list_channels` and `ask_project` are read-only and idempotent, the `generate_*` tools (including `generate_plan_review`), `plan_whatif`, `apply_template`, `create_work_item`, `create_raid_entry` and `request_change` add something and are not idempotent (each call runs a generation, creates items or an entry or files a request), `link_evidence` adds a link and is idempotent (the same link twice leaves the item unchanged) and five tools carry `destructiveHint: true`, so clients can ask before they run: `delete_work_item` and `update_work_item` (idempotent: the deletion can be restored from the change history and the same values twice leave the item unchanged) and `resolve_suggestion`, `decide_approval` and `discord_send_message` (not idempotent: each call applies a change, decides a request or posts a message that cannot be taken back).
 
 - `get_workspace_context`: Show the workspaces the API key reaches (how many personal projects, each organization by name with your role), how many projects it can open, the active project and your role in it.
 - `list_projects`: List every accessible project (personal and organization) with id, scope, role and the prefix of its work item keys.
@@ -83,6 +83,7 @@ Work item tools, `resolve_suggestion`, `create_raid_entry`, `delete_work_item`, 
 - `onboard_me` (arguments `role`, optional `focus`): reads the existing insights first and generates an onboarding brief only when none fits.
 - `weekly_status`: writes a short status update from the plan, the register and the last days of activity.
 - Resource template `flowrelay://projects/{project_id}/handoffs/latest`: the latest active handoff of a project as Markdown.
+- Resource template `flowrelay://jobs/{job_id}`: the state of a generation started with `wait: false` and the finished document.
 
 ### Filter Dimensions
 
@@ -122,6 +123,20 @@ Add this to the MCP config file of your client (the `mcpServers` block most clie
   }
 }
 ```
+
+## Plugins and one-click install
+
+Assistants that load plugins can install Flow Relay without editing a config file. One plugin source covers all of them:
+
+- ChatGPT and Codex
+- Claude (Claude Code, chat and Desktop)
+- Cursor
+- VS Code and GitHub Copilot
+- Antigravity
+- Gemini CLI
+- Mistral Vibe
+
+The plugin is at https://github.com/flow-relay/flowrelay-agent-plugin with the install steps for each client. The MCP documentation at https://www.flowrelay.it/docs/mcp covers the hosted server and the setup of every other MCP client. Cline installs from [llms-install.md](llms-install.md).
 
 ## Multi-Tenant Behavior
 
